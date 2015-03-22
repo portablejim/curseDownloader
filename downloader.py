@@ -12,9 +12,8 @@ from tkinter import ttk, filedialog
 import urllib
 
 parser = argparse.ArgumentParser(description="Download Curse modpack mods")
-group = parser.add_mutually_exclusive_group(required=True)
-group.add_argument("--manifest", help="manifest.json file from unzipped pack")
-group.add_argument("--gui", action="store_true", help="Use gui to to select manifest")
+parser.add_argument("--manifest", help="manifest.json file from unzipped pack")
+parser.add_argument("--nogui", dest="gui", action="store_false", help="Do not use gui to to select manifest")
 args = parser.parse_args()
 
 class downloadUI(ttk.Frame):
@@ -71,6 +70,9 @@ class downloadUI(ttk.Frame):
         self.logText.insert("end", message + "\n")
         self.logText["state"] = "disabled"
 
+    def setManifest(self, fileName):
+        self.manifestPath.set(fileName)
+
 class headlessUI():
     def setOutput(self, message):
         pass
@@ -115,8 +117,10 @@ def doDownload(manifest):
 
         i += 1
 
-if(args.gui):
+if args.gui:
     programGui = downloadUI()
+    if args.manifest is not None:
+        programGui.setManifest(args.manifest)
     programGui.root.mainloop()
 else:
     programGui = headlessUI()

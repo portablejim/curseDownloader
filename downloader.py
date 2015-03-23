@@ -14,7 +14,7 @@ import urllib
 parser = argparse.ArgumentParser(description="Download Curse modpack mods")
 parser.add_argument("--manifest", help="manifest.json file from unzipped pack")
 parser.add_argument("--nogui", dest="gui", action="store_false", help="Do not use gui to to select manifest")
-args = parser.parse_args()
+args, unknown = parser.parse_known_args()
 
 class downloadUI(ttk.Frame):
     def __init__(self):

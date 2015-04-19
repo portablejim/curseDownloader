@@ -9,7 +9,6 @@ import shutil
 from threading import Thread
 from tkinter import *
 from tkinter import ttk, filedialog
-import urllib
 
 parser = argparse.ArgumentParser(description="Download Curse modpack mods")
 parser.add_argument("--manifest", help="manifest.json file from unzipped pack")
@@ -94,6 +93,11 @@ def doDownload(manifest):
     if overridePath.exists():
         shutil.move(str(overridePath), str(minecraftPath))
 
+    if not minecraftPath.exists():
+        minecraftPath.mkdir()
+        modsPath = minecraftPath / "mods"
+        if not modsPath.exists():
+            modsPath.exists()
 
     sess = requests.session()
 

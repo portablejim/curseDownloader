@@ -85,6 +85,7 @@ def doDownload(manifest):
 
     manifestText = ""
     manifestText = manifestPath.open().read()
+    manifestText = manifestText.replace('\r', '').replace('\n', '')
 
     manifestJson = json.loads(manifestText)
 

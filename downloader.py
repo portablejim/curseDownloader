@@ -1,5 +1,6 @@
 #!python3
 
+import appdirs
 import argparse
 import json
 from pathlib import Path
@@ -93,6 +94,11 @@ def doDownload(manifest):
     if overridePath.exists():
         shutil.move(str(overridePath), str(minecraftPath))
 
+    downloaderDirs = appdirs.AppDirs(appname="cursePackDownloader", appauthor="portablejim")
+    cachePath = Path(downloaderDirs.user_cache_dir, "curseCache")
+    if not cachePath.exists():
+        cachePath.mkdir(parents=True)
+
     if not minecraftPath.exists():
         minecraftPath.mkdir()
         modsPath = minecraftPath / "mods"
@@ -108,17 +114,34 @@ def doDownload(manifest):
     programGui.setOutput("%d files to download" % (iLen))
 
     for dependency in manifestJson['files']:
-        projectResponse = sess.get("http://minecraft.curseforge.com/mc-mods/%s" % (dependency['projectID']), stream=True)
-        fileResponse = sess.get("%s/files/%s/download" % (projectResponse.url, dependency['fileID']), stream=True)
-        while fileResponse.is_redirect:
-            source = fileResponse
-            fileResponse = sess.get(source, stream=True)
-        filePath = Path(fileResponse.url)
-        fileName = filePath.name.replace("%20", " ")
-        print("[%d/%d] %s" % (i, iLen, fileName))
-        programGui.setOutput("[%d/%d] %s" % (i, iLen, fileName))
-        with open(str(minecraftPath / "mods" / fileName), "wb") as mod:
-            mod.write(fileResponse.content)
+        depCacheDir = cachePath / dependency['projectID'] / dependency['fileID']
+        if depCacheDir.is_dir():
+            # File is cached
+            depFiles = [f for f in depCacheDir.iterdir()]
+            if len(depFiles) >= 1:
+                depFile = depFiles[0]
+                targetFile = minecraftPath / "mods" / depFile.name
+                shutil.copyfile(str(depFile), str(targetFile))
+                programGui.setOutput("[%d/%d] %s (cached)" % (i, iLen, targetFile.name))
+        else:
+            # File is not cached and needs to be downloaded
+            projectResponse = sess.get("http://minecraft.curseforge.com/mc-mods/%s" % (dependency['projectID']), stream=True)
+            fileResponse = sess.get("%s/files/%s/download" % (projectResponse.url, dependency['fileID']), stream=True)
+            while fileResponse.is_redirect:
+                source = fileResponse
+                fileResponse = sess.get(source, stream=True)
+            filePath = Path(fileResponse.url)
+            fileName = filePath.name.replace("%20", " ")
+            print("[%d/%d] %s" % (i, iLen, fileName))
+            programGui.setOutput("[%d/%d] %s" % (i, iLen, fileName))
+            with open(str(minecraftPath / "mods" / fileName), "wb") as mod:
+                mod.write(fileResponse.content)
+
+            # Try to add file to cache.
+            if not depCacheDir.exists():
+                depCacheDir.mkdir(parents=True)
+                with open(str(depCacheDir / fileName)) as mod:
+                    mod.write(fileResponse.content)
 
         i += 1
 

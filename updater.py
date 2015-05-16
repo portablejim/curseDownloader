@@ -38,11 +38,46 @@ def getFilesForVersion(session, mcversion, modid, modname):
         return versions[mcversion]
     else:
         return []
-    pass
+
+
+def get_newer_files(file_list, target_file):
+    newer_files = []
+    for test_file in file_list:
+        if test_file["id"] is not target_file:
+            newer_files += [test_file]
+        else:
+            break
+
+    return newer_files
+
+
+def get_filtered_files(file_list):
+    remaining_alpha = 3
+    remaining_beta = 2
+    remaining_release = 2
+
+    filtered_list = []
+    for test_file in file_list:
+        if test_file["type"] == "release" and remaining_release > 0:
+            remaining_release -= 1
+        elif test_file["type"] == "beta" and remaining_beta > 0:
+            remaining_beta -= 1
+        elif test_file["type"] == "alpha" and remaining_alpha > 0:
+            remaining_alpha -= 1
+        else:
+            continue
+
+        filtered_list += [test_file]
+
+    return filtered_list
+
+
+
 
 
 sess = requests.session()
 #v = getNameForNumericalId(sess, 67133)
 fs = getFilesForVersion(sess, "1.7.10", 67133, "veinminer")
-for f in fs:
+ffs = get_filtered_files(fs)
+for f in ffs:
     print("%s | %s: %s" % (f["name"], f["type"], f["id"]))

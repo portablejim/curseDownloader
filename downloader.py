@@ -151,6 +151,15 @@ def doDownload(manifest):
 
         i += 1
 
+    # This is not available in curse-only packs
+    if 'directDownload' in manifestJson:
+        try:
+            for download_entry in manifestJson:
+                download_cache_dir = cachePath / str(download_entry[''])
+                pass
+        except:
+            pass
+
 if args.gui:
     programGui = downloadUI()
     if args.manifest is not None:

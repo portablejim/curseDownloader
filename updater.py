@@ -2,14 +2,92 @@ import argparse
 import json
 from pathlib import Path
 import re
+from tkinter import Tk
+import tkinter
+
 import requests
+
 
 __author__ = 'james'
 
 parser = argparse.ArgumentParser(description="Update Curse modpack manifest")
 parser.add_argument("--manifest", help="manifest.json file from unzipped pack")
-#parser.add_argument("--noIgui", dest="gui", action="store_false", help="Do not use gui to to select manifest")
+parser.add_argument("--nogui", dest="gui", action="store_false", help="Do not use gui to to select manifest")
 args, unknown = parser.parse_known_args()
+
+
+class UpdateChooseGui():
+    optionChosen = -1
+    optionValues = {}
+
+    def __init__(self):
+        self.choose_gui = None
+        self.choose_listbox = None
+
+    def get_option(self, choices):
+        self.choose_gui = Tk()
+        self.choose_gui.title("Choose file to use")
+        self.choose_gui.minsize(500, 200)
+        self.center(self.choose_gui)
+        choose_gui_frame = tkinter.Frame(self.choose_gui)
+        choose_gui_frame.pack(fill=tkinter.BOTH, expand=True)
+        self.choose_listbox = tkinter.Listbox(choose_gui_frame)
+        i = 0
+        for choice in choices:
+            self.choose_listbox.insert(i, choice["text"])
+            self.optionValues[i] = choice["value"]
+            i += 1
+        self.choose_listbox.pack(side=tkinter.TOP, fill=tkinter.BOTH, expand=True)
+
+        choose_button = tkinter.Button(choose_gui_frame, text="Use version", command=self.set_option)
+        choose_button.pack(side=tkinter.BOTTOM, fill=tkinter.X)
+
+        self.choose_gui.mainloop()
+
+        if self.optionChosen > -1:
+            return self.optionValues[self.optionChosen]
+        else:
+            return -1
+
+    def set_option(self):
+        self.optionChosen = self.choose_listbox.curselection()[0]
+        self.choose_gui.quit()
+
+    def center(self, toplevel):
+        toplevel.update_idletasks()
+        w = toplevel.winfo_screenwidth()
+        h = toplevel.winfo_screenheight()
+        size = tuple(int(_) for _ in toplevel.geometry().split('+')[0].split('x'))
+        x = w/2 - size[0]/2
+        y = h/2 - size[1]/2
+        # noinspection PyStringFormat
+        toplevel.geometry("%dx%d+%d+%d" % (size + (x, y)))
+
+
+class UpdateChooseCli():
+    optionChosen = -1
+    optionValues = {}
+    def get_option(self, choices):
+
+        i = 0
+        for choice in choices:
+            print("%d) %s" % (i+1, choice["text"]))
+            self.optionValues[i] = choice["value"]
+            i += 1
+
+        while self.optionChosen is -1:
+            try:
+                test_val = int(input("Choose file to use: "))
+                if test_val in self.optionValues:
+                    self.optionChosen = test_val
+            except ValueError:
+                pass
+
+        if self.optionChosen > -1:
+            return self.optionValues[self.optionChosen]
+        else:
+            return -1
+
 
 def parseManifest(manifest):
     manifestPath = Path(manifest)
@@ -72,6 +150,17 @@ def get_filtered_files(file_list):
     return filtered_list
 
 
+def get_selectable_options(options):
+    release_type_lookup = {"release": "Release", "beta": "Beta", "alpha": "Alpha"}
+
+    selectable_options = []
+    for option in options:
+        new_val = dict()
+        new_val["text"] = "[%s] %s (id %s)" % (release_type_lookup[option["type"]], option["name"], option["id"])
+        new_val["value"] = option["id"]
+        selectable_options.append(new_val)
+
+    return selectable_options
 
 
 
@@ -79,5 +168,11 @@ sess = requests.session()
 #v = getNameForNumericalId(sess, 67133)
 fs = getFilesForVersion(sess, "1.7.10", 67133, "veinminer")
 ffs = get_filtered_files(fs)
-for f in ffs:
-    print("%s | %s: %s" % (f["name"], f["type"], f["id"]))
+gui = None
+print(args)
+if args.gui:
+    gui = UpdateChooseGui()
+else:
+    gui = UpdateChooseCli()
+x = gui.get_option(get_selectable_options(ffs))
+print(x)

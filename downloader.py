@@ -1,4 +1,5 @@
 #!python3
+from urllib.parse import urlparse
 
 import appdirs
 import argparse
@@ -153,12 +154,38 @@ def doDownload(manifest):
 
     # This is not available in curse-only packs
     if 'directDownload' in manifestJson:
-        try:
-            for download_entry in manifestJson:
-                download_cache_dir = cachePath / str(download_entry[''])
-                pass
-        except:
-            pass
+        i = 1
+        i_len = len(manifestJson['directDownload'])
+        programGui.setOutput("%d additional files to download." % i_len)
+        for download_entry in manifestJson['directDownload']:
+            if "url" not in download_entry or "filename" not in download_entry:
+                programGui.setOutput("[%d/%d] <Error>" % (i, i_len))
+                i += 1
+                continue
+            source_url = urlparse(download_entry['url'])
+            download_cache_children = Path(source_url.path).parent.relative_to('/')
+            download_cache_dir = cachePath / "directdownloads" / download_cache_children
+            cache_target = Path(download_cache_dir / download_entry['filename'])
+            if cache_target.exists():
+                # Cached
+                target_file = minecraftPath / "mods" / cache_target.name
+                shutil.copyfile(str(cache_target), str(target_file))
+
+                i += 1
+
+                # Cache access is successful,
+                # Don't download the file
+                continue
+            # File is not cached and needs to be downloaded
+            file_response = sess.get(source_url, stream=True)
+            while file_response.is_redirect:
+                source = file_response
+                file_response = sess.get(source, stream=True)
+            programGui.setOutput("[%d/%d] %s" % (i, i_len, download_entry['filename']))
+            with open(str(minecraftPath / "mods" / download_entry['filename']), "wb") as mod:
+                mod.write(file_response.content)
+
+            i += 1
 
 if args.gui:
     programGui = downloadUI()

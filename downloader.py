@@ -15,6 +15,7 @@ from tkinter import ttk, filedialog
 parser = argparse.ArgumentParser(description="Download Curse modpack mods")
 parser.add_argument("--manifest", help="manifest.json file from unzipped pack")
 parser.add_argument("--nogui", dest="gui", action="store_false", help="Do not use gui to to select manifest")
+parser.add_argument("--portable", dest="portable", action="store_true", help="Use portable cache")
 args, unknown = parser.parse_known_args()
 
 class downloadUI(ttk.Frame):
@@ -96,9 +97,19 @@ def doDownload(manifest):
         shutil.move(str(overridePath), str(minecraftPath))
 
     downloaderDirs = appdirs.AppDirs(appname="cursePackDownloader", appauthor="portablejim")
-    cachePath = Path(downloaderDirs.user_cache_dir, "curseCache")
-    if not cachePath.exists():
-        cachePath.mkdir(parents=True)
+    cache_path = Path(downloaderDirs.user_cache_dir, "curseCache")
+
+    # Attempt to set proper portable data directory if asked for
+    if args.portable:
+        if '__file__' in globals():
+            cache_path = Path(os.path.dirname(os.path.realpath(__file__)), "CPD_data")
+        else:
+            print("Portable data dir not supported for interpreter environment")
+            exit(2)
+
+
+    if not cache_path.exists():
+        cache_path.mkdir(parents=True)
 
     if not minecraftPath.exists():
         minecraftPath.mkdir()
@@ -115,7 +126,7 @@ def doDownload(manifest):
     programGui.setOutput("%d files to download" % (iLen))
 
     for dependency in manifestJson['files']:
-        depCacheDir = cachePath / str(dependency['projectID']) / str(dependency['fileID'])
+        depCacheDir = cache_path / str(dependency['projectID']) / str(dependency['fileID'])
         if depCacheDir.is_dir():
             # File is cached
             depFiles = [f for f in depCacheDir.iterdir()]
@@ -164,7 +175,7 @@ def doDownload(manifest):
                 continue
             source_url = urlparse(download_entry['url'])
             download_cache_children = Path(source_url.path).parent.relative_to('/')
-            download_cache_dir = cachePath / "directdownloads" / download_cache_children
+            download_cache_dir = cache_path / "directdownloads" / download_cache_children
             cache_target = Path(download_cache_dir / download_entry['filename'])
             if cache_target.exists():
                 # Cached

@@ -91,7 +91,6 @@ class UpdateChooseCli():
 
 def parseManifest(manifest):
     manifestPath = Path(manifest)
-    targetDirPath = manifestPath.parent
 
     manifestText = manifestPath.open().read()
     manifestText = manifestText.replace('\r', '').replace('\n', '')
@@ -179,7 +178,7 @@ def is_up_to_date(file_id, file_type, file_list, ignore_less_stable=True):
 
 
 sess = requests.session()
-#v = getNameForNumericalId(sess, 67133)
+# v = getNameForNumericalId(sess, 67133)
 fs = getFilesForVersion(sess, "1.7.10", 67133, "veinminer")
 ffs = get_filtered_files(fs)
 gui = None

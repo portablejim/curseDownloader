@@ -85,7 +85,6 @@ def doDownload(manifest):
     manifestPath = Path(manifest)
     targetDirPath = manifestPath.parent
 
-    manifestText = ""
     manifestText = manifestPath.open().read()
     manifestText = manifestText.replace('\r', '').replace('\n', '')
 
@@ -106,7 +105,6 @@ def doDownload(manifest):
         else:
             print("Portable data dir not supported for interpreter environment")
             exit(2)
-
 
     if not cache_path.exists():
         cache_path.mkdir(parents=True)

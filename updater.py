@@ -163,6 +163,20 @@ def get_selectable_options(options):
     return selectable_options
 
 
+def is_up_to_date(file_id, file_type, file_list, ignore_less_stable=True):
+    types = ['alpha', 'beta', 'release']
+    # Get more stable/better files release > beta > alpha
+    target_types = None
+    if ignore_less_stable and file_type in types:
+        target_types = types[types.index(file_type):]
+    else:
+        target_types = types
+    for file_item in file_list:
+        if file_item['type'] in target_types:
+            return file_item['id'] == file_id
+
+    return False
+
 
 sess = requests.session()
 #v = getNameForNumericalId(sess, 67133)

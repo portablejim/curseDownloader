@@ -13,5 +13,10 @@ setup(
     name="cursePackDownloader",
     version="0.2",
     description="Download extra mods from Curse-hosted Minecraft modpacks",
-    executables=[Executable("downloader.py", targetName=targetName)]
+    executables=[Executable("downloader.py", targetName=targetName)],
+    install_requires=[
+        'appdirs',
+        'requests',
+        'tk'
+    ]
 )

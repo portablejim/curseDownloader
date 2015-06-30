@@ -1,5 +1,5 @@
 #!python3
-from urllib.parse import urlparse
+from urllib.parse import urlparse, unquote
 
 import appdirs
 import argparse
@@ -53,8 +53,8 @@ class downloadUI(ttk.Frame):
 
     def chooseFile(self):
         filePath = filedialog.askopenfilename(
-                filetypes=(("Json files", "*.json"),), 
-                initialdir=os.path.expanduser("~"), 
+                filetypes=(("Json files", "*.json"),),
+                initialdir=os.path.expanduser("~"),
                 parent=self)
         self.manifestPath.set(filePath)
 
@@ -147,7 +147,7 @@ def doDownload(manifest):
             source = fileResponse
             fileResponse = sess.get(source, stream=True)
         filePath = Path(fileResponse.url)
-        fileName = filePath.name.replace("%20", " ")
+        fileName = unquote(filePath.name)
         print("[%d/%d] %s" % (i, iLen, fileName))
         programGui.setOutput("[%d/%d] %s" % (i, iLen, fileName))
         with open(str(minecraftPath / "mods" / fileName), "wb") as mod:

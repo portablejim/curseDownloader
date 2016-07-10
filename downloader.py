@@ -51,6 +51,10 @@ class downloadUI(ttk.Frame):
         self.logText = Text(self, state="disabled", wrap="none")
         self.logText.grid(column=0, row=2, sticky=(N,E,S,W))
 
+        self.logScroll = Scrollbar(self, command=self.logText.yview)
+        self.logScroll.grid(column=1, row=2, sticky=(N,E,S,W))
+        self.logText['yscrollcommand'] = self.logScroll.set
+
     def chooseFile(self):
         filePath = filedialog.askopenfilename(
                 filetypes=(("Json files", "*.json"),),
@@ -70,6 +74,7 @@ class downloadUI(ttk.Frame):
     def setOutput(self, message):
         self.logText["state"] = "normal"
         self.logText.insert("end", message + "\n")
+        self.logText.see(END)
         self.logText["state"] = "disabled"
 
     def setManifest(self, fileName):

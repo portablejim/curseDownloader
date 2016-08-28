@@ -116,9 +116,10 @@ def doDownload(manifest):
 
     if not minecraftPath.exists():
         minecraftPath.mkdir()
-        modsPath = minecraftPath / "mods"
-        if not modsPath.exists():
-            modsPath.mkdir()
+        
+    modsPath = minecraftPath / "mods"
+    if not modsPath.exists():
+        modsPath.mkdir()
 
     sess = requests.session()
 

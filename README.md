@@ -13,7 +13,7 @@ A simple script to download mods from a CurseForge Minecraft modpack.
 
 #### Linux
 
-`sudo apt-get install python3 python3-tk python3-pip'
+`sudo apt-get install python3 python3-tk python3-pip`
 `pip3 install appdirs`
 
 ## How to use

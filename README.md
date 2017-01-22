@@ -6,7 +6,8 @@ A simple script to download mods from a CurseForge Minecraft modpack.
 ## Requirements
 
 - Python 3.4+
-- appdirs 
+- appdirs
+- requests
 - python-tk
 
 ### Setup

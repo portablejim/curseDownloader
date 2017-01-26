@@ -113,10 +113,12 @@ def doDownload(manifest):
 
     if not cache_path.exists():
         cache_path.mkdir(parents=True)
+    print("Cache path : %s" % (cache_path))
 
-    modsPath = minecraftPath / "mods"
     if not minecraftPath.exists():
         minecraftPath.mkdir()
+
+    modsPath = minecraftPath / "mods"
     if not modsPath.exists():
         modsPath.mkdir()
 
@@ -146,7 +148,7 @@ def doDownload(manifest):
                 continue
 
         # File is not cached and needs to be downloaded
-        projectResponse = sess.get("http://minecraft.curseforge.com/mc-mods/%s" % (dependency['projectID']), stream=True)
+        projectResponse = sess.get("https://minecraft.curseforge.com/projects/%s" % (dependency['projectID']), stream=True)
         projectResponse.url = projectResponse.url.replace('?cookieTest=1', '')
         fileResponse = sess.get("%s/files/%s/download" % (projectResponse.url, dependency['fileID']), stream=True)
         while fileResponse.is_redirect:

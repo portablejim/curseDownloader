@@ -10,7 +10,17 @@ A simple script to download mods from a CurseForge Minecraft modpack.
 - requests
 - python-tk
 
+### Installation
+
+#### Fedora
+
+- `sudo dnf copr enable srakitnican/minecraft`
+- `sudo dnf install cursedownloader`
+
 ### Setup
+#### Fedora
+
+- `sudo dnf install python3-appdirs python3-requests python3-tkinter`
 
 #### Ubuntu
 

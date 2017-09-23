@@ -1,2 +1,2 @@
-appdirs==1.4.0
-requests==2.12.5
+appdirs==1.4.3
+requests==2.18.4

@@ -7,6 +7,7 @@ import json
 from pathlib import Path
 import os
 import requests
+from multiprocessing import Queue
 import shutil
 from threading import Thread
 from tkinter import *
@@ -148,8 +149,17 @@ def doDownload(manifest):
                 continue
 
         # File is not cached and needs to be downloaded
-        projectResponse = sess.get("https://minecraft.curseforge.com/projects/%s" % (dependency['projectID']), stream=True)
-        projectResponse.url = projectResponse.url.replace('?cookieTest=1', '')
+        projectResponse = sess.get("https://minecraft.curseforge.com/projects/%s" % (dependency['projectID']), stream=True, allow_redirects=False)
+        
+        auth_cookie = None
+        for redirect in sess.resolve_redirects(projectResponse, projectResponse.request):
+             sess.cookies.update({'Auth.Token': auth_cookie})
+             if redirect.headers.get('Set-Cookie') is not None:
+                  cookie_list = redirect.headers.get('Set-Cookie').split(";")[0].split("=")
+                  if cookie_list[0] == 'Auth.Token':
+                        auth_cookie = cookie_list[1]
+             projectResponse.url = redirect.url
+
         fileResponse = sess.get("%s/files/%s/download" % (projectResponse.url, dependency['fileID']), stream=True)
         while fileResponse.is_redirect:
             source = fileResponse
